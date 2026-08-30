@@ -44,7 +44,7 @@ diRW 是一个 C++17 编写的 Android 进程内存读写库。通过统一的�
 | **syscallRW** | 跨进程需要 | 不需要 | 跨进程/同进程 | 快 | 使用 `process_vm_readv`/`writev` 系统调用。同 UID 进程免 root，跨 UID（读其他应用）需要 root |
 | **copyRW** | 不需要 | 不需要 | 同进程 | 最快 | 直接 `memcpy`，不能访问其他进程 |
 | **Qx11RW** | 需要 | QX11 驱动 | 跨进程/同进程 | 快 | 通过 `ioctl` 与 QX11 内核驱动通信 |
-| **RtRW** | 需要 | Root 驱动 | 跨进程/同进程 | 快 | 通过 `ioctl` 与 RT 内核驱动通信 |
+| **RtRW** | 需要 | Rt 驱动 | 跨进程/同进程 | 快 | 通过 `ioctl` 与 RT 内核驱动通信 |
 | **TGodRW** | 需要 | TGod 模块 (KPM) | 跨进程/同进程 | 快/中等 | 通过 inet socket 的 `ioctl` 与内核模块通信；支持无缓存读取 |
 | **TwTRW** | 需要 | TwT 驱动 | 跨进程/同进程 | 快 | fd 由驱动的 reboot 魔数分支下发（anon_inode），`ioctl` 通信；附带触摸/陀螺仪/硬件断点 |
 
@@ -107,7 +107,7 @@ android {
 #include "syscallRW.hpp"   // 系统调用方式（免root）
 // #include "copyRW.hpp"    // 同进程 memcpy
 // #include "Qx11RW.hpp"    // QX11 内核驱动
-// #include "RtRW.hpp"      // Root 内核驱动
+// #include "RtRW.hpp"      // Rt 内核驱动
 // #include "TGodRW.hpp"    // TGod 内核模块（KPM）
 // #include "TwTRW.hpp"     // TwT 内核驱动
 
@@ -432,7 +432,7 @@ DiRW/                        # 仓库根（原 jni/ 目录）
     ├── syscallRW.hpp        # 后端：process_vm 系统调用
     ├── copyRW.hpp           # 后端：memcpy 同进程读写
     ├── Qx11RW.hpp           # 后端：QX11 内核驱动
-    ├── RtRW.hpp             # 后端：Root 内核驱动
+    ├── RtRW.hpp             # 后端：Rt 内核驱动
     ├── TGodRW.hpp           # 后端：TGod 内核模块（DiDevice.kpm）
     └── TwTRW.hpp            # 后端：TwT 内核驱动（anon_inode ioctl）
 ```
