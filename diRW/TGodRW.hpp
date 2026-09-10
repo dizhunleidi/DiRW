@@ -44,7 +44,7 @@ public:
 protected:
     int fd = -1;
 
-    // 读模式的管理复用 pid 的 Global/Private 语义：
+    // 读模式的作用域与 pid 共用同一个 mode：
     //   Global  —— 存静态 globalMod，setMod 对所有 Global 实例（跨线程）生效
     //   Private —— 存实例 localMod，多线程各用各的，互不干扰
     bool useGlobalMod = true;
@@ -53,8 +53,8 @@ protected:
     inline static std::atomic<ReadMode> globalMod = ReadMode::NORMAL;
 
 public:
-    // modMode: 读模式的作用域，与目标 pid 的 PidMode 是两回事，互不影响
-    TGodRW(PidMode mode, int tpid = 0, PidMode modMode = PidMode::Global);
+    // 读模式的作用域与目标 pid 共用同一个 mode
+    TGodRW(PidMode mode, int tpid = 0);
     ~TGodRW() override;
     uintptr_t get_module_base(const char* name) override;
     bool readv(uintptr_t address, void *buffer, size_t size) override;
@@ -71,8 +71,8 @@ public:
 
 // --- inline implementations ---
 
-inline TGodRW::TGodRW(PidMode mode, int tpid, PidMode modMode)
-    : baseRW(mode, tpid), useGlobalMod(modMode == PidMode::Global) {
+inline TGodRW::TGodRW(PidMode mode, int tpid)
+    : baseRW(mode, tpid), useGlobalMod(mode == PidMode::Global) {
     fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (fd < 0) {
         printf("\n[-] TGod socket 创建失败\n");

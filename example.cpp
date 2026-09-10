@@ -287,9 +287,9 @@ static void demo_tgodrw() {
      * 构造时自动 CONNECT 握手，isConnected() 可查询握手结果。
      * 需求：root + 设备上已加载 DiDevice.kpm（push 后用 kpatch 加载）。
      *
-     * 读模式作用域复用 pid 的 Global/Private 语义（第三个构造参数）：
-     *   Global（默认）—— setMod 改静态全局，对所有 Global 实例生效
-     *   Private       —— 读模式存实例内，多线程各用各的互不干扰
+     * 读模式作用域与 pid 共用同一个 mode：
+     *   Global  —— setMod 改静态全局，对所有 Global 实例生效
+     *   Private —— 读模式存实例内，多线程各用各的互不干扰
      */
     auto* rw = new TGodRW(baseRW::PidMode::Private, getPID("com.example.target"));
     if (!rw->isConnected() || rw->getProcessPid() < 0) {
@@ -314,7 +314,7 @@ static void demo_tgodrw() {
     else
         cout << "[TGodRW]  有缓存读取失败" << endl;
 
-    // 无缓存读取：Global 模式下切全局，读完切回
+    // 无缓存读取：切模式读完切回（Private 只影响本实例，Global 影响所有 Global 实例）
     rw->setMod(TGodRW::ReadMode::NO_CACHE);
     int value2 = 0;
     if (rw->readv(base, &value2, sizeof(value2)))
@@ -323,8 +323,8 @@ static void demo_tgodrw() {
         cout << "[TGodRW]  无缓存读取失败" << endl;
     rw->setMod(TGodRW::ReadMode::NORMAL);
 
-    // 多线程场景建议每线程一个 Private 读模式的实例：
-    // auto* rw2 = new TGodRW(baseRW::PidMode::Private, pid, baseRW::PidMode::Private);
+    // 多线程场景建议每线程一个 Private 实例：
+    // auto* rw2 = new TGodRW(baseRW::PidMode::Private, pid);
     // rw2->setMod(TGodRW::ReadMode::NO_CACHE);  // 只影响 rw2
 
     // 写入并读回验证
@@ -357,7 +357,7 @@ static void demo_twtrw() {
      *   new TwTRW(mode, pid, baseRW::PidMode::Global, 0, 1);  // 陀螺仪 tracepoint + 触摸模式 1
      * 也可以构造后单独调 gyro_init() / touch_init()。
      *
-     * 读模式作用域复用 pid 的 Global/Private 语义（第三个构造参数，同 TGodRW）：
+     * 读模式作用域独立于 pid（第三个构造参数，默认 Global）：
      *   MOD1（默认）走 READ_MEM；MOD2 走 READ_MEM_V2 —— 驱动的两条读取通道
      *   Global（默认）—— setMod 改静态全局；Private —— 读模式存实例内互不干扰
      *

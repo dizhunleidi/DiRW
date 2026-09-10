@@ -182,10 +182,10 @@ baseRW::setGlobalPid(getPID("app2"));
 ### 7. TGodRW 读模式（有缓存/无缓存）
 
 ```cpp
-// 读模式的作用域复用 PID 的 Global/Private 语义（构造第三个参数，默认 Global）
+// 读模式的作用域与 pid 共用同一个 mode
 auto* rw = new TGodRW(baseRW::PidMode::Private, getPID("com.example.app"));
 
-// Global 模式（默认）：对所有 Global 实例生效
+// Private 实例：只影响自身；Global 实例：对所有 Global 实例生效
 rw->setMod(TGodRW::ReadMode::NO_CACHE);
 rw->setMod(TGodRW::ReadMode::NORMAL);
 
@@ -193,8 +193,8 @@ rw->setMod(TGodRW::ReadMode::NORMAL);
 TGodRW::setGlobalMod(TGodRW::ReadMode::NO_CACHE);
 TGodRW::ReadMode m = TGodRW::getGlobalMod();
 
-// 多线程场景：每线程一个 Private 读模式的实例，互不干扰
-auto* rw2 = new TGodRW(baseRW::PidMode::Private, pid, baseRW::PidMode::Private);
+// 多线程场景：每线程一个 Private 实例，互不干扰
+auto* rw2 = new TGodRW(baseRW::PidMode::Private, pid);
 rw2->setMod(TGodRW::ReadMode::NO_CACHE);   // 只影响 rw2
 ```
 
@@ -206,7 +206,7 @@ rw2->setMod(TGodRW::ReadMode::NO_CACHE);   // 只影响 rw2
 // TwT 驱动的 fd 由 reboot 系统调用魔数分支自动下发，构造即完成对接
 // 第 4/5 个参数可独立启用陀螺仪和触摸（-1 不启用，默认）：
 //   gyro_mode: 0=tracepoint 1=uprobe    touch_mode: 0/1
-// 第 3 个参数是读模式作用域（同 TGodRW，默认 Global）
+// 第 3 个参数是读模式作用域（独立于 pid 的 mode，默认 Global）
 auto* rw = new TwTRW(baseRW::PidMode::Private, getPID("com.example.app"), baseRW::PidMode::Global, 0, 1);
 if (!rw->isConnected()) { /* 驱动未加载或无 root */ }
 
@@ -214,7 +214,7 @@ if (!rw->isConnected()) { /* 驱动未加载或无 root */ }
 rw->gyro_init(0);
 rw->touch_init(1);
 
-// 读模式（同 TGodRW 的作用域处理，复用 pid 的 Global/Private 语义）：
+// 读模式（作用域独立于 pid，复用 Global/Private 语义，由构造第三个参数决定）：
 //   MOD1（默认）走 READ_MEM；MOD2 走 READ_MEM_V2 —— 驱动的两条读取通道
 rw->setMod(TwTRW::ReadMode::MOD2);       // Global 实例改全局，Private 实例只改自己
 rw->setMod(TwTRW::ReadMode::MOD1);
@@ -410,10 +410,9 @@ int val = rw->getDword(0x12345678);
 构造函数第 4/5 个参数 `gyro_mode`、`touch_mode` 可在构造时独立初始化陀螺仪与
 触摸（`-1` 不启用），也可构造后各自单独调用 `gyro_init()`/`touch_init()`。
 
-**TwTRW 读模式**：作用域处理与 `TGodRW` 相同——`MOD1`（默认）走 `READ_MEM`、
-`MOD2` 走 `READ_MEM_V2`，是驱动的两条读取通道；读模式作用域复用 PID 的
-Global/Private 语义（构造第三个参数），支持全局切换（`setGlobalMod`）或按实例
-独立，多线程互不干扰。
+**TwTRW 读模式**：`MOD1`（默认）走 `READ_MEM`、`MOD2` 走 `READ_MEM_V2`，是驱动的两条读取通道；
+读模式作用域独立于 pid，复用 Global/Private 语义（构造第三个参数），支持全局切换（`setGlobalMod`）
+或按实例独立，多线程互不干扰。（`TGodRW` 已改为读模式与 pid 共用同一个 `mode`，无第三个参数。）
 
 ---
 
