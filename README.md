@@ -9,6 +9,7 @@ diRW 是一个 C++17 编写的 Android 进程内存读写库。通过统一的�
 ## 更新日志
 
 版本变更记录见 [CHANGELOG.md](CHANGELOG.md)。
+3.0版本将原来单独的配套搜索功能合并，详细见 [README_memtool.md](README_memtool.md)。
 
 ---
 

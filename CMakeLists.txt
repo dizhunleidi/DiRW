@@ -24,14 +24,37 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/diRW
+    ${CMAKE_CURRENT_SOURCE_DIR}/DiMemTool
+
 )
 
 set(SOURCES
-    example.cpp
+
+    DiMemTool/MemPatch.cpp
+    DiMemTool/MemSearch.cpp
+    DiMemTool/PageTool.cpp
+    DiMemTool/ProcessTool.cpp
 )
 
 
 
-add_executable(DiRW_test ${SOURCES})
 
-target_link_libraries(DiRW_test log)
+
+add_executable(DiRW_test
+    example.cpp
+    ${SOURCES}
+ )
+
+ add_executable(MemTool_test
+    MemTool_example.cpp
+    ${SOURCES}
+ )
+
+target_link_libraries(DiRW_test
+log
+ )
+
+ target_link_libraries(MemTool_test
+log
+ )
+
