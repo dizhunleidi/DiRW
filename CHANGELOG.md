@@ -3,6 +3,12 @@
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式，
 版本号遵循语义化版本。
 
+## [2.62] - 2026-09-13
+
+### 变更
+-TGodRW的获取基质功能改为内核
+-优化了例子的cmakeliat，方便编译与vscode配置
+
 ## [2.61] - 2026-09-10
 
 ### 变更
